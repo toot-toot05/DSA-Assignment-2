@@ -1,31 +1,31 @@
 # Food Delivery Kafka Microservices
 
-Simple Ballerina + Kafka + MongoDB food delivery platform.
+A Ballerina-based food delivery system built with Kafka and MongoDB.
 
 ## Services
 
-| Service      | Port | Role                                 |
-| ------------ | ---- | ------------------------------------ |
-| customer     | 9091 | Customer CRUD                        |
-| restaurant   | 9092 | Restaurants & menus                  |
-| order        | 9093 | Place orders, status updates         |
-| payment      | —    | Kafka: pay on `orders.created`       |
-| delivery     | 9095 | Assign drivers, complete deliveries  |
-| notification | —    | Logs all Kafka lifecycle events      |
-| admin        | 9097 | Summary / revenue / delivery reports |
+| Service      | Port | Role                                      |
+| ------------ | ---- | ----------------------------------------- |
+| customer     | 9091 | Manage customer information and records   |
+| restaurant   | 9092 | Handle restaurants and their menus        |
+| order        | 9093 | Create orders and manage order statuses   |
+| payment      | —    | Processes payments through `orders.created` |
+| delivery     | 9095 | Allocate drivers and finalize deliveries  |
+| notification | —    | Records Kafka events throughout the system |
+| admin        | 9097 | Provides summaries, revenue, and delivery reports |
 
 ## Kafka flow
 
-```
+```text
 POST /orders
   -> orders.created
-  -> payment pays -> payments.completed
-  -> order CONFIRMED
-  -> delivery assigns driver -> delivery.assigned
-  -> order OUT_FOR_DELIVERY
+  -> payment processes payment -> payments.completed
+  -> order becomes CONFIRMED
+  -> delivery assigns a driver -> delivery.assigned
+  -> order becomes OUT_FOR_DELIVERY
 PUT /deliveries/{orderId}/complete
   -> delivery.completed
-  -> order DELIVERED
+  -> order becomes DELIVERED
 ```
 
 ## Run
@@ -34,7 +34,7 @@ PUT /deliveries/{orderId}/complete
 docker compose up --build -d
 ```
 
-Watch service logs:
+Monitor the service activity with:
 
 ```bash
 docker compose logs -f order payment delivery notification
@@ -47,7 +47,7 @@ cd client
 bal run
 ```
 
-Or directly:
+Alternatively, run a specific option directly:
 
 ```bash
 bal run -- seed
@@ -57,6 +57,6 @@ bal run -- admin
 
 CLI options:
 
-1. Seed sample restaurants/customers/orders
-2. Customer portal (browse, order, track)
-3. Admin dashboard (reports + complete delivery)
+1. Populate the system with example restaurants, customers, and orders
+2. Access the customer portal to browse, place orders, and track deliveries
+3. Open the admin dashboard for reports and delivery completion
