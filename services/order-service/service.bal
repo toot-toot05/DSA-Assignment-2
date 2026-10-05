@@ -1,3 +1,5 @@
+import ballerina/time;
+
 public function isValidTransition(OrderStatus current, OrderStatus next) returns boolean {
     match current {
         "CREATED" => {
@@ -31,7 +33,10 @@ public function transitionOrder(Order currentOrder, OrderStatus nextStatus) retu
         return error("Invalid order status transition: " + currentOrder.status + " -> " + nextStatus);
     }
 
+    string now = time:utcToString(time:utcNow());
     currentOrder.status = nextStatus;
+    currentOrder.updatedAt = now;
+    currentOrder.statusHistory.push({status: nextStatus, at: now});
 
     return currentOrder;
 }
