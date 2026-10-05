@@ -1,4 +1,5 @@
 import ballerina/time;
+import ballerina/uuid;
 
 public type OrderStatus
     "CREATED" | "CONFIRMED" | "PREPARING" | "READY"
@@ -20,7 +21,7 @@ public type Address record {|
 
 public type StatusChange record {|
     OrderStatus status;
-    string at;            // ISO-8601 UTC
+    string at;
     string reason?;
 |};
 
@@ -50,7 +51,6 @@ public type StatusUpdateRequest record {|
     string reason?;
 |};
 
-// Allowed transitions
 public final readonly & map<OrderStatus[]> TRANSITIONS = {
     "CREATED": ["CONFIRMED", "CANCELLED"],
     "CONFIRMED": ["PREPARING", "CANCELLED"],
@@ -61,16 +61,24 @@ public final readonly & map<OrderStatus[]> TRANSITIONS = {
     "CANCELLED": []
 };
 
-public isolated function canTransition(OrderStatus from, OrderStatus to) returns boolean {
-    OrderStatus[]? allowed = TRANSITIONS[from];
-    return allowed is OrderStatus[] && allowed.indexOf(to) != ();
-}
-
-// Shared Kafka envelope
 public type OrderEvent record {|
     string eventId;
-    string eventType;     // e.g. ORDER_CREATED
+    string eventType;
     string orderId;
     string timestamp;
     json payload;
 |};
+
+public function canTransition(
+    OrderStatus currentStatus,
+    OrderStatus nextStatus
+) returns boolean {
+
+    OrderStatus[]? allowed = TRANSITIONS[currentStatus];
+
+    if allowed is () {
+        return false;
+    }
+
+    return allowed.indexOf(nextStatus) is int;
+}
